@@ -1,0 +1,49 @@
+### Node & build outputs
+node_modules/
+dist/
+build/
+
+### Runtime & cache
+.env
+.env.*
+.cache/
+.next/
+*.log
+
+### Package managers
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+### Credentials
+*.key
+*.pem
+*.crt
+google-services.json
+*.jks
+/.ssh/
+
+### Docs & office files
+*.doc
+*.docx
+*.pdf
+*.xlsx
+*.ppt
+*.pptx
+*.odt
+
+### Generated artifacts
+coverage/
+reports/
+
+### Editors / OS
+.DS_Store
+.vscode/
+.idea/
+
+### Security folders
+/secrets/
+/keys/
+/private/
+
+
