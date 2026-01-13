@@ -45,7 +45,7 @@ const getApiBaseUrl = (): string => {
     // Check for environment variable overrides
     // We check both VITE_API_URL (used in vite.config.ts) and VITE_API_BASE_URL
     const envApiUrl = import.meta.env?.VITE_API_URL || import.meta.env?.VITE_API_BASE_URL;
-    
+
     if (envApiUrl) {
         // Ensure the URL ends with /api
         return envApiUrl.endsWith("/api") ? envApiUrl : `${envApiUrl}/api`;
@@ -248,6 +248,10 @@ class ApiService {
         });
     }
 
+    async getRandomSuggestedWords(count: number = 4): Promise<{ words: string[] }> {
+        return this.request(`/words/suggested?count=${count}`);
+    }
+
     async saveLearningCard(card: LearningCardType, collectionId?: string): Promise<{ message: string }> {
         const url = collectionId ? `/users/collections?collectionId=${collectionId}` : "/users/collections";
         return this.request(url, {
@@ -256,14 +260,22 @@ class ApiService {
         });
     }
 
-    async createCollection(name: string, description?: string, flags?: string[], color?: string): Promise<{ message: string }> {
+    async createCollection(
+        name: string,
+        description?: string,
+        flags?: string[],
+        color?: string
+    ): Promise<{ message: string }> {
         return this.request("/users/collections/create", {
             method: "POST",
             body: JSON.stringify({ name, description, flags, color }),
         });
     }
 
-    async updateCollection(collectionId: string, updates: { name?: string; description?: string; flags?: string[]; color?: string }): Promise<{ message: string }> {
+    async updateCollection(
+        collectionId: string,
+        updates: { name?: string; description?: string; flags?: string[]; color?: string }
+    ): Promise<{ message: string }> {
         return this.request(`/users/collections/${collectionId}`, {
             method: "PUT",
             body: JSON.stringify(updates),
@@ -308,10 +320,14 @@ class ApiService {
     }
 
     // Spaced Repetition / Review APIs
-    async getCardsForReview(collectionId?: string, collectionIds?: string[]): Promise<{ cards: any[] }> {
+    async getCardsForReview(
+        collectionId?: string,
+        collectionIds?: string[],
+        mode?: "due" | "all"
+    ): Promise<{ cards: any[] }> {
         let url = "/users/review/due";
         const params = new URLSearchParams();
-        
+
         if (collectionIds && collectionIds.length > 0) {
             // Multiple collection IDs
             params.append("collectionIds", collectionIds.join(","));
@@ -319,18 +335,22 @@ class ApiService {
             // Single collection ID
             params.append("collectionId", collectionId);
         }
-        
+
+        if (mode) {
+            params.append("mode", mode);
+        }
+
         const queryString = params.toString();
         if (queryString) {
             url += `?${queryString}`;
         }
-        
+
         return this.request(url);
     }
 
     async recordCardReview(
-        collectionId: string, 
-        cardId: string, 
+        collectionId: string,
+        cardId: string,
         rating: 1 | 2 | 3 | 4,
         confidence?: number,
         questionType?: string,
@@ -339,14 +359,14 @@ class ApiService {
     ): Promise<{ message: string }> {
         return this.request("/users/review/record", {
             method: "POST",
-            body: JSON.stringify({ 
-                collectionId, 
-                cardId, 
+            body: JSON.stringify({
+                collectionId,
+                cardId,
                 rating,
                 confidence,
                 questionType,
                 timeSpent,
-                pronunciationScore
+                pronunciationScore,
             }),
         });
     }
@@ -358,7 +378,7 @@ class ApiService {
     async getReviewStats(collectionId?: string, collectionIds?: string[]): Promise<any> {
         let url = "/users/review/stats";
         const params = new URLSearchParams();
-        
+
         if (collectionIds && collectionIds.length > 0) {
             // Multiple collection IDs
             params.append("collectionIds", collectionIds.join(","));
@@ -366,12 +386,12 @@ class ApiService {
             // Single collection ID
             params.append("collectionId", collectionId);
         }
-        
+
         const queryString = params.toString();
         if (queryString) {
             url += `?${queryString}`;
         }
-        
+
         return this.request(url);
     }
 

@@ -91,6 +91,28 @@ export interface ReviewStats {
     averageEase: number;
     longestStreak: number;
     currentStreak: number;
+    // Enhanced stats
+    learningDistribution: {
+        new: number;
+        learning: number;
+        review: number;
+        relearning: number;
+        mastered: number;
+    };
+    difficultWords: {
+        id: string;
+        word: string;
+        meaning: string;
+        easeFactor: number;
+        reviewCount: number;
+    }[];
+    mostForgotten: {
+        id: string;
+        word: string;
+        meaning: string;
+        lapseCount: number;
+        reviewCount: number;
+    }[];
 }
 
 // Enhanced Learning types

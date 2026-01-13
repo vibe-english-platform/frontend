@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { Badge } from "./ui/badge";
 import { apiService } from "../lib/api";
 import { useToast } from "../lib/toast";
 import { Collection } from "../types";
@@ -56,18 +55,18 @@ function CollectionManager({ collections, onCollectionsChange }: CollectionManag
 
     const addFlag = () => {
         if (newFlag.trim() && !formData.flags.includes(newFlag.trim())) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
                 ...prev,
-                flags: [...prev.flags, newFlag.trim()]
+                flags: [...prev.flags, newFlag.trim()],
             }));
             setNewFlag("");
         }
     };
 
     const removeFlag = (flagToRemove: string) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            flags: prev.flags.filter(flag => flag !== flagToRemove)
+            flags: prev.flags.filter((flag) => flag !== flagToRemove),
         }));
     };
 
@@ -124,8 +123,16 @@ function CollectionManager({ collections, onCollectionsChange }: CollectionManag
     };
 
     const predefinedColors = [
-        "#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6",
-        "#EC4899", "#06B6D4", "#84CC16", "#F97316", "#6366F1"
+        "#3B82F6",
+        "#EF4444",
+        "#10B981",
+        "#F59E0B",
+        "#8B5CF6",
+        "#EC4899",
+        "#06B6D4",
+        "#84CC16",
+        "#F97316",
+        "#6366F1",
     ];
 
     const handleClone = async (collection: Collection) => {
@@ -143,144 +150,185 @@ function CollectionManager({ collections, onCollectionsChange }: CollectionManag
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Manage Collections</h3>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button onClick={openCreateDialog} className="bg-indigo-600 hover:bg-indigo-700">
-                            <Plus className="w-4 h-4 mr-2" />
-                            New Collection
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gray-900 border-gray-700">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Create New Collection</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="name" className="text-white">Name</Label>
-                                <Input
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                    className="bg-gray-800 border-gray-600 text-white"
-                                    placeholder="e.g., Vocabulary Basics"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="description" className="text-white">Description (optional)</Label>
-                                <Textarea
-                                    id="description"
-                                    value={formData.description}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                    className="bg-gray-800 border-gray-600 text-white"
-                                    placeholder="Brief description of this collection"
-                                />
-                            </div>
-                            <div>
-                                <Label className="text-white">Flags/Tags</Label>
-                                <div className="flex gap-2 mb-2">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="bg-white rounded-2xl p-6 border-4 border-black shadow-[0_6px_0_rgba(0,0,0,0.2)]">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-3xl font-black text-gray-800">⚙️ Manage Collections</h3>
+                        <p className="text-gray-600 font-bold mt-1">Create, edit, and organize your collections!</p>
+                    </div>
+                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                onClick={openCreateDialog}
+                                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-black px-8 py-4 rounded-full border-3 border-black shadow-[0_6px_0_rgba(0,0,0,0.2)] hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                                <Plus className="w-5 h-5 mr-2" />
+                                New Collection
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-white border-4 border-black max-w-lg shadow-[0_12px_0_rgba(0,0,0,0.3)]">
+                            <DialogHeader>
+                                {/* Fun header */}
+                                <div className="text-center mb-4">
+                                    <DialogTitle className="text-2xl font-black text-gray-800 capitalize">
+                                        Create New Collection!
+                                    </DialogTitle>
+                                    <p className="text-gray-600 font-bold">Let&apos;s build something amazing! ✨</p>
+                                </div>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                                <div>
+                                    <Label
+                                        htmlFor="name"
+                                        className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                        📝 Collection Name *
+                                    </Label>
                                     <Input
-                                        value={newFlag}
-                                        onChange={(e) => setNewFlag(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && addFlag()}
-                                        className="bg-gray-800 border-gray-600 text-white"
-                                        placeholder="e.g., beginner, grammar"
+                                        id="name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                                        className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                        placeholder="e.g., My Awesome Words! 🌟"
                                     />
-                                    <Button onClick={addFlag} variant="outline">Add</Button>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {formData.flags.map((flag) => (
-                                        <Badge key={flag} variant="secondary" className="flex items-center gap-1">
-                                            {flag}
-                                            <X
-                                                className="w-3 h-3 cursor-pointer hover:text-red-400"
-                                                onClick={() => removeFlag(flag)}
-                                            />
-                                        </Badge>
-                                    ))}
+                                <div>
+                                    <Label
+                                        htmlFor="description"
+                                        className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                        📖 Description
+                                    </Label>
+                                    <Textarea
+                                        id="description"
+                                        value={formData.description}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({ ...prev, description: e.target.value }))
+                                        }
+                                        className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                        placeholder="Tell us about this collection! 🎯"
+                                        rows={3}
+                                    />
                                 </div>
-                            </div>
-                            <div>
-                                <Label className="text-white">Color</Label>
-                                <div className="flex gap-2 mt-2">
-                                    {predefinedColors.map((color) => (
-                                        <button
-                                            key={color}
-                                            className={`w-8 h-8 rounded-full border-2 ${
-                                                formData.color === color ? 'border-white' : 'border-gray-600'
-                                            }`}
-                                            style={{ backgroundColor: color }}
-                                            onClick={() => setFormData(prev => ({ ...prev, color }))}
+                                <div>
+                                    <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                        🏷️ Tags/Flags
+                                    </Label>
+                                    <div className="flex gap-2 mb-3">
+                                        <Input
+                                            value={newFlag}
+                                            onChange={(e) => setNewFlag(e.target.value)}
+                                            onKeyPress={(e) => e.key === "Enter" && addFlag()}
+                                            className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                            placeholder="e.g., beginner, fun, animals 🐶"
                                         />
-                                    ))}
+                                        <Button
+                                            onClick={addFlag}
+                                            className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-4 rounded-xl border-2 border-purple-600">
+                                            Add
+                                        </Button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {formData.flags.map((flag) => (
+                                            <span
+                                                key={flag}
+                                                className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-800 font-bold text-sm rounded-full border-2 border-purple-300">
+                                                {flag}
+                                                <X
+                                                    className="w-4 h-4 cursor-pointer hover:text-red-500 transition-colors"
+                                                    onClick={() => removeFlag(flag)}
+                                                />
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                        🎨 Choose Color
+                                    </Label>
+                                    <div className="flex flex-wrap gap-3">
+                                        {predefinedColors.map((color) => (
+                                            <button
+                                                key={color}
+                                                className={`w-10 h-10 rounded-full border-3 transition-all hover:scale-110 ${
+                                                    formData.color === color
+                                                        ? "border-black shadow-lg scale-110"
+                                                        : "border-gray-300 hover:border-gray-400"
+                                                }`}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => setFormData((prev) => ({ ...prev, color }))}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 mt-8">
+                                    <Button
+                                        onClick={() => setIsCreateDialogOpen(false)}
+                                        className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3 rounded-full border-3 border-gray-400 hover:border-gray-500">
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleCreate}
+                                        className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black py-3 rounded-full border-3 border-black hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                                        Create!
+                                    </Button>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleCreate} className="bg-indigo-600 hover:bg-indigo-700">
-                                    Create Collection
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             {/* Collections List */}
-            <div className="space-y-2">
+            <div className="space-y-4">
                 {collections.map((collection) => (
-                    <div key={collection.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                        <div className="flex items-center gap-4">
+                    <div
+                        key={collection.id}
+                        className="flex flex-wrap items-center justify-between p-5 bg-white rounded-2xl border-3 border-black shadow-[0_4px_0_rgba(0,0,0,0.2)] hover:shadow-[0_6px_0_rgba(0,0,0,0.3)] transition-all">
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div
-                                className="w-4 h-4 rounded-full"
-                                style={{ backgroundColor: collection.color || '#3B82F6' }}
+                                className="w-8 h-8 rounded-full border-3 border-white shadow-lg flex-shrink-0"
+                                style={{ backgroundColor: collection.color || "#3B82F6" }}
                             />
-                            <div>
-                                <h4 className="text-white font-medium">{collection.name}</h4>
+                            <div className="min-w-0 flex-1">
+                                <h4 className="text-gray-800 font-black text-lg truncate">{collection.name}</h4>
                                 {collection.description && (
-                                    <p className="text-sm text-white/70">{collection.description}</p>
+                                    <p className="text-gray-600 font-semibold text-sm line-clamp-2">
+                                        {collection.description}
+                                    </p>
                                 )}
-                                <div className="flex gap-2 mt-1">
+                                <div className="flex flex-wrap gap-2 mt-2">
                                     {collection.flags.map((flag) => (
-                                        <Badge key={flag} variant="outline" className="text-xs">
+                                        <span
+                                            key={flag}
+                                            className="px-2 py-1 bg-purple-100 text-purple-800 font-bold text-xs rounded-full border border-purple-300">
                                             {flag}
-                                        </Badge>
+                                        </span>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-white/60">
-                                {collection.cards.length} cards
-                            </span>
+                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                            <div className="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full border-2 border-blue-400 text-sm">
+                                {collection.cards.length} 📄
+                            </div>
                             <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => openEditDialog(collection)}
-                                className="text-white/80 hover:text-white"
-                            >
+                                size="icon"
+                                className="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold p-2 rounded-full border-2 border-yellow-500 shadow-lg hover:shadow-xl transition-all">
                                 <Edit className="w-4 h-4" />
                             </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleClone(collection)}
-                            className="text-white/80 hover:text-white"
-                        >
-                            <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(collection)}
-                            className="text-red-400 hover:text-red-300"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                            <Button
+                                onClick={() => handleClone(collection)}
+                                size="icon"
+                                className="bg-blue-400 hover:bg-blue-500 text-blue-900 font-bold p-2 rounded-full border-2 border-blue-500 shadow-lg hover:shadow-xl transition-all">
+                                <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                onClick={() => handleDelete(collection)}
+                                size="icon"
+                                className="bg-red-400 hover:bg-red-500 text-red-900 font-bold p-2 rounded-full border-2 border-red-500 shadow-lg hover:shadow-xl transition-all">
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
                         </div>
                     </div>
                 ))}
@@ -288,74 +336,106 @@ function CollectionManager({ collections, onCollectionsChange }: CollectionManag
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="bg-gray-900 border-gray-700">
+                <DialogContent className="bg-white border-4 border-black max-w-lg shadow-[0_12px_0_rgba(0,0,0,0.3)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Edit Collection</DialogTitle>
+                        {/* Fun header */}
+                        <div className="text-center mb-4">
+                            <div className="text-4xl mb-2">✏️</div>
+                            <DialogTitle className="text-2xl font-black text-gray-800 capitalize">
+                                Edit Collection!
+                            </DialogTitle>
+                            <p className="text-gray-600 font-bold">Make it even better! ✨</p>
+                        </div>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div>
-                            <Label htmlFor="edit-name" className="text-white">Name</Label>
+                            <Label
+                                htmlFor="edit-name"
+                                className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                📝 Collection Name *
+                            </Label>
                             <Input
                                 id="edit-name"
                                 value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                className="bg-gray-800 border-gray-600 text-white"
+                                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                                className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
                             />
                         </div>
                         <div>
-                            <Label htmlFor="edit-description" className="text-white">Description (optional)</Label>
+                            <Label
+                                htmlFor="edit-description"
+                                className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                📖 Description
+                            </Label>
                             <Textarea
                                 id="edit-description"
                                 value={formData.description}
-                                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                className="bg-gray-800 border-gray-600 text-white"
+                                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                                className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                rows={3}
                             />
                         </div>
                         <div>
-                            <Label className="text-white">Flags/Tags</Label>
-                            <div className="flex gap-2 mb-2">
+                            <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                🏷️ Tags/Flags
+                            </Label>
+                            <div className="flex gap-2 mb-3">
                                 <Input
                                     value={newFlag}
                                     onChange={(e) => setNewFlag(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && addFlag()}
-                                    className="bg-gray-800 border-gray-600 text-white"
-                                    placeholder="Add a flag"
+                                    onKeyPress={(e) => e.key === "Enter" && addFlag()}
+                                    className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                    placeholder="Add a tag!"
                                 />
-                                <Button onClick={addFlag} variant="outline">Add</Button>
+                                <Button
+                                    onClick={addFlag}
+                                    className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-4 rounded-xl border-2 border-purple-600">
+                                    Add
+                                </Button>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {formData.flags.map((flag) => (
-                                    <Badge key={flag} variant="secondary" className="flex items-center gap-1">
-                                        {flag}
+                                    <span
+                                        key={flag}
+                                        className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-800 font-bold text-sm rounded-full border-2 border-purple-300">
                                         <X
-                                            className="w-3 h-3 cursor-pointer hover:text-red-400"
+                                            className="w-4 h-4 cursor-pointer hover:text-red-500 transition-colors"
                                             onClick={() => removeFlag(flag)}
                                         />
-                                    </Badge>
+                                        {flag}
+                                    </span>
                                 ))}
                             </div>
                         </div>
                         <div>
-                            <Label className="text-white">Color</Label>
-                            <div className="flex gap-2 mt-2">
+                            <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                🎨 Choose Color
+                            </Label>
+                            <div className="flex flex-wrap gap-3">
                                 {predefinedColors.map((color) => (
                                     <button
                                         key={color}
-                                        className={`w-8 h-8 rounded-full border-2 ${
-                                            formData.color === color ? 'border-white' : 'border-gray-600'
+                                        className={`w-10 h-10 rounded-full border-3 transition-all hover:scale-110 ${
+                                            formData.color === color
+                                                ? "border-black shadow-lg scale-110"
+                                                : "border-gray-300 hover:border-gray-400"
                                         }`}
                                         style={{ backgroundColor: color }}
-                                        onClick={() => setFormData(prev => ({ ...prev, color }))}
+                                        onClick={() => setFormData((prev) => ({ ...prev, color }))}
                                     />
                                 ))}
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                                Cancel
+                        <div className="flex gap-3 mt-8">
+                            <Button
+                                onClick={() => setIsEditDialogOpen(false)}
+                                className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3 rounded-full border-3 border-gray-400 hover:border-gray-500">
+                                Cancel 😔
                             </Button>
-                            <Button onClick={handleUpdate} className="bg-indigo-600 hover:bg-indigo-700">
-                                Update Collection
+                            <Button
+                                onClick={handleUpdate}
+                                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-black py-3 rounded-full border-3 border-black hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                                Update! 🚀
                             </Button>
                         </div>
                     </div>

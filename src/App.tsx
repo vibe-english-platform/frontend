@@ -1,83 +1,27 @@
 import { useEffect, useState } from "react";
-import WordInput from "./components/WordInput";
-import MeaningSelector from "./components/MeaningSelector";
-import LearningCard from "./components/LearningCard";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import HeroSection from "./components/HeroSection";
+import HomePage from "./components/HomePage";
+import SearchPage from "./components/SearchPage";
 import AuthDialog from "./components/AuthDialog";
 import CollectionsPage from "./components/CollectionsPage";
+import CollectionDetailPage from "./components/CollectionDetailPage";
 import LearningCenterPage from "./components/LearningCenterPage";
-import { WordMeaning, LearningCard as LearningCardType, User } from "./types";
+import ReviewPage from "./components/ReviewPage";
+import { User } from "./types";
 import { apiService } from "./lib/api";
 import { useToast } from "./lib/toast";
 
 function App() {
-    const getInitialView = (): "learn" | "collections" | "learning" => {
-        if (typeof window === "undefined") return "learn";
-        if (window.location.pathname === "/collections") return "collections";
-        if (window.location.pathname === "/learning") return "learning";
-        return "learn";
-    };
-
-    const [view, setView] = useState<"learn" | "collections" | "learning">(getInitialView);
-    const [step, setStep] = useState<number>(1);
-    const [word, setWord] = useState<string>("");
-    const [meanings, setMeanings] = useState<WordMeaning[]>([]);
-    const [learningCard, setLearningCard] = useState<LearningCardType | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [showAuth, setShowAuth] = useState<boolean>(false);
     const [authLoading, setAuthLoading] = useState<boolean>(false);
     const { showToast } = useToast();
-    const isCollectionsView = view === "collections";
-    const isLearningCenterView = view === "learning";
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            if (apiService.isAuthenticated()) {
-                try {
-                    const userData = await apiService.getProfile();
-                    setUser(userData);
-                    setIsAuthenticated(true);
-                } catch {
-                    apiService.removeToken();
-                    setIsAuthenticated(false);
-                    setUser(null);
-                }
-            }
-        };
-        checkAuth();
-    }, []);
-
-    useEffect(() => {
-        const handlePopState = () => {
-            const pathname = window.location.pathname;
-            if (pathname === "/collections") {
-                setView("collections");
-            } else if (pathname === "/learning") {
-                setView("learning");
-            } else {
-                setView("learn");
-            }
-        };
-        window.addEventListener("popstate", handlePopState);
-        return () => window.removeEventListener("popstate", handlePopState);
-    }, []);
-
-    const pushState = (nextView: "learn" | "collections" | "learning") => {
-        if (typeof window === "undefined") return;
-        const nextPath =
-            nextView === "collections" ? "/collections" : nextView === "learning" ? "/learning" : "/";
-        window.history.pushState(null, "", nextPath);
-    };
-
-    const handleSwitchView = (nextView: "learn" | "collections" | "learning") => {
-        setView(nextView);
-        pushState(nextView);
-    };
-
+    // Authentication handlers
     const handleLogin = async (email: string, password: string) => {
         setAuthLoading(true);
         try {
@@ -112,12 +56,10 @@ function App() {
         apiService.logout();
         setIsAuthenticated(false);
         setUser(null);
-        setStep(1);
-        setWord("");
-        setMeanings([]);
-        setLearningCard(null);
+        navigate("/");
     };
 
+    // Navigation handlers
     const handleWordLearned = async (learnedWord: string, learnedMeaning: string) => {
         if (isAuthenticated && user) {
             try {
@@ -130,43 +72,12 @@ function App() {
         }
     };
 
-    const handleWordSubmit = (
-        searchWord: string,
-        fetchedMeanings: WordMeaning[],
-        selectedMeaning?: string,
-        customMeaning?: string
-    ) => {
-        setWord(searchWord);
-        setMeanings(fetchedMeanings);
-        if (selectedMeaning || customMeaning) {
-            handleMeaningSelect(selectedMeaning || customMeaning || "", searchWord);
-        } else {
-            setStep(2);
-        }
+    const handleGetStarted = () => {
+        navigate("/search");
     };
 
-    const handleMeaningSelect = async (meaning: string, overrideWord?: string) => {
-        const targetWord = overrideWord ?? word;
-        setLoading(true);
-
-        try {
-            const data = await apiService.generateLearningCard(targetWord, meaning);
-            setLearningCard(data);
-            setStep(3);
-            handleWordLearned(targetWord, meaning);
-        } catch (error) {
-            console.error("Error generating learning card:", error);
-            showToast("Failed to generate learning card. Please try again.", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleReset = () => {
-        setStep(1);
-        setWord("");
-        setMeanings([]);
-        setLearningCard(null);
+    const handleHomeNavigation = () => {
+        navigate("/search");
     };
 
     const handleViewCollection = () => {
@@ -175,9 +86,7 @@ function App() {
             setShowAuth(true);
             return;
         }
-
-        handleReset();
-        handleSwitchView("collections");
+        navigate("/collections");
     };
 
     const handleViewLearningCenter = () => {
@@ -186,35 +95,62 @@ function App() {
             setShowAuth(true);
             return;
         }
-
-        handleSwitchView("learning");
+        navigate("/learning");
     };
 
     const handleBackFromCollections = () => {
-        handleReset();
-        handleSwitchView("learn");
+        navigate("/search");
     };
 
     const handleBackFromLearningCenter = () => {
-        handleSwitchView("collections");
+        navigate("/collections");
     };
 
-    const handleCardSaved = async () => {
-        if (!isAuthenticated) return;
-
-        try {
-            const profile = await apiService.getProfile();
-            setUser(profile);
-        } catch (error) {
-            console.error("Failed to refresh profile after save:", error);
+    const handleViewSpecificCollection = (collectionId: string) => {
+        if (!isAuthenticated) {
+            showToast("Sign in to view collections", "error");
+            setShowAuth(true);
+            return;
         }
-
-        handleSwitchView("collections");
+        navigate(`/collection/${collectionId}`);
     };
 
+    const handleStartReview = (collectionIds: string[], mode: "due" | "all") => {
+        const params = new URLSearchParams();
+        if (collectionIds.length > 0) params.append("collections", collectionIds.join(","));
+        params.append("mode", mode);
+        navigate(`/review?${params.toString()}`);
+    };
+
+    const handleBackFromReview = () => {
+        navigate("/learning");
+    };
+
+    // Auth check on mount
     useEffect(() => {
-        console.log("isCollectionsView", isCollectionsView);
-    }, [isCollectionsView]);
+        const checkAuth = async () => {
+            if (apiService.isAuthenticated()) {
+                try {
+                    const userData = await apiService.getProfile();
+                    setUser(userData);
+                    setIsAuthenticated(true);
+                } catch {
+                    apiService.removeToken();
+                    setIsAuthenticated(false);
+                    setUser(null);
+                }
+            }
+        };
+        checkAuth();
+    }, []);
+
+    // Get review params from URL
+    const getReviewParams = () => {
+        const urlParams = new URLSearchParams(location.search);
+        const collections = urlParams.get("collections")?.split(",") ?? [];
+        const mode = (urlParams.get("mode") as "due" | "all") ?? "due";
+        return { collectionIds: collections, mode };
+    };
 
     return (
         <div className="min-h-screen">
@@ -225,57 +161,62 @@ function App() {
                 onSignIn={() => setShowAuth(true)}
                 onViewCollection={handleViewCollection}
                 onViewLearningCenter={handleViewLearningCenter}
+                onGetStarted={handleHomeNavigation}
             />
 
-            {!isCollectionsView && !isLearningCenterView && <HeroSection />}
-
-            <main className="max-w-4xl mx-auto px-4 pb-12">
-                {isCollectionsView ? (
-                    <CollectionsPage
-                        collections={user?.collections ?? []}
-                        onBack={handleBackFromCollections}
-                        onCollectionsChange={() => {
-                            if (isAuthenticated && user) {
-                                apiService.getProfile().then(setUser).catch(console.error);
-                            }
-                        }}
-                        onOpenLearningCenter={handleViewLearningCenter}
-                    />
-                ) : isLearningCenterView ? (
-                    <LearningCenterPage
-                        collections={user?.collections ?? []}
-                        onBack={handleBackFromLearningCenter}
-                        onCollectionsChange={() => {
-                            if (isAuthenticated && user) {
-                                apiService.getProfile().then(setUser).catch(console.error);
-                            }
-                        }}
-                    />
-                ) : (
-                    <>
-                        {step === 1 && (
-                            <WordInput
-                                onWordSubmit={handleWordSubmit}
-                                isAuthenticated={isAuthenticated}
-                                onLoginRequired={() => setShowAuth(true)}
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <HomePage
+                            onGetStarted={handleGetStarted}
+                            onSignIn={() => setShowAuth(true)}
+                            isAuthenticated={isAuthenticated}
+                        />
+                    }
+                />
+                <Route
+                    path="/search"
+                    element={
+                        <SearchPage
+                            isAuthenticated={isAuthenticated}
+                            collections={user?.collections ?? []}
+                            onLoginRequired={() => setShowAuth(true)}
+                            onWordLearned={handleWordLearned}
+                            onCollectionsChange={() => {
+                                if (isAuthenticated && user) {
+                                    apiService.getProfile().then(setUser).catch(console.error);
+                                }
+                            }}
+                            onViewCollections={handleViewCollection}
+                        />
+                    }
+                />
+                <Route
+                    path="/collections"
+                    element={
+                        isAuthenticated ? (
+                            <CollectionsPage
+                                collections={user?.collections ?? []}
+                                onBack={handleBackFromCollections}
+                                onViewCollection={handleViewSpecificCollection}
+                                onCollectionsChange={() => {
+                                    if (isAuthenticated && user) {
+                                        apiService.getProfile().then(setUser).catch(console.error);
+                                    }
+                                }}
+                                onOpenLearningCenter={handleViewLearningCenter}
                             />
-                        )}
-
-                        {step === 2 && (
-                            <MeaningSelector
-                                word={word}
-                                meanings={meanings}
-                                onMeaningSelect={handleMeaningSelect}
-                                loading={loading}
-                                onBack={handleReset}
-                            />
-                        )}
-
-                        {step === 3 && learningCard && (
-                            <LearningCard
-                                card={learningCard}
-                                onReset={handleReset}
-                                onSaved={handleCardSaved}
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/collection/:id"
+                    element={
+                        isAuthenticated ? (
+                            <CollectionDetailPage
                                 collections={user?.collections ?? []}
                                 onCollectionsChange={() => {
                                     if (isAuthenticated && user) {
@@ -283,10 +224,52 @@ function App() {
                                     }
                                 }}
                             />
-                        )}
-                    </>
-                )}
-            </main>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/learning"
+                    element={
+                        isAuthenticated ? (
+                            <LearningCenterPage
+                                collections={user?.collections ?? []}
+                                onBack={handleBackFromLearningCenter}
+                                onStartReview={handleStartReview}
+                                onCollectionsChange={() => {
+                                    if (isAuthenticated && user) {
+                                        apiService.getProfile().then(setUser).catch(console.error);
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/review"
+                    element={
+                        isAuthenticated ? (
+                            <ReviewPage
+                                collectionIds={getReviewParams().collectionIds}
+                                mode={getReviewParams().mode}
+                                onClose={handleBackFromReview}
+                                onComplete={() => {
+                                    handleBackFromReview();
+                                    if (isAuthenticated && user) {
+                                        apiService.getProfile().then(setUser).catch(console.error);
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
 
             <AuthDialog
                 open={showAuth}

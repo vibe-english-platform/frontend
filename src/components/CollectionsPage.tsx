@@ -2,22 +2,28 @@ import { useState } from "react";
 import { Collection, CollectionCard } from "../types";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import { Badge } from "./ui/badge";
 import CollectionManager from "./CollectionManager";
 import CardDetailDialog from "./CardDetailDialog";
 import ReviewDashboard from "./ReviewDashboard";
-import EnhancedReviewSession from "./EnhancedReviewSession";
 
 interface CollectionsPageProps {
     collections: Collection[];
     onBack: () => void;
     onCollectionsChange?: () => void;
     onOpenLearningCenter?: () => void;
+    onViewCollection?: (collectionId: string) => void;
+    onStartReview?: (collectionIds: string[], mode: "due" | "all") => void;
 }
 
-function CollectionsPage({ collections, onBack, onCollectionsChange, onOpenLearningCenter }: CollectionsPageProps) {
+function CollectionsPage({
+    collections,
+    onBack,
+    onCollectionsChange,
+    onOpenLearningCenter,
+    onViewCollection,
+    onStartReview,
+}: CollectionsPageProps) {
     const [showManager, setShowManager] = useState(false);
-    const [showReviewSession, setShowReviewSession] = useState(false);
     const [selectedCardInfo, setSelectedCardInfo] = useState<{
         card: CollectionCard;
         collectionId: string;
@@ -41,31 +47,38 @@ function CollectionsPage({ collections, onBack, onCollectionsChange, onOpenLearn
     };
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
+        <div className="space-y-8 max-w-6xl mx-auto px-4 py-8">
+            {/* Header Section */}
+            <div className="text-center space-y-4">
+                <div className="inline-block">
+                    <h1
+                        className="text-5xl font-black text-gray-800"
+                        style={{ textShadow: "3px 3px 0 rgba(255,200,0,0.3)" }}>
+                        📚 My Collection
+                    </h1>
+                    <p className="text-gray-600 font-bold text-lg mt-2">Your personalized learning library! 🎉</p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
                     <Button
-                        variant="ghost"
-                        className="text-white/80 hover:text-white hover:bg-white/10"
-                        onClick={onBack}>
-                        ← Back to learning
+                        onClick={onBack}
+                        className="bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold px-6 py-3 rounded-full border-3 border-gray-400 shadow-[0_4px_0_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0_rgba(0,0,0,0.1)] hover:translate-y-0.5 transition-all">
+                        ← Back
                     </Button>
                     {onOpenLearningCenter && (
-                        <Button variant="outline" size="sm" onClick={onOpenLearningCenter} className="text-white/80">
-                            Launch Learning Center
+                        <Button
+                            onClick={onOpenLearningCenter}
+                            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-black px-6 py-3 rounded-full border-3 border-black shadow-[0_4px_0_rgba(0,0,0,0.2)] hover:shadow-[0_2px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                            Learning Center
                         </Button>
                     )}
+                    <Button
+                        onClick={() => setShowManager((prev) => !prev)}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black px-6 py-3 rounded-full border-3 border-black shadow-[0_4px_0_rgba(0,0,0,0.2)] hover:shadow-[0_2px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                        {showManager ? "View Cards" : "Manage Collections"}
+                    </Button>
                 </div>
-                <div className="text-center flex-1">
-                    <p className="text-xs uppercase tracking-wide text-gray-400">Your curated collections</p>
-                    <h2 className="text-2xl font-semibold text-white">Saved Learning Cards</h2>
-                </div>
-                <Button
-                    variant="ghost"
-                    onClick={() => setShowManager((prev) => !prev)}
-                    className="text-white/80 hover:text-white hover:bg-white/10">
-                    {showManager ? "View Cards" : "Manage Collections"}
-                </Button>
             </div>
 
             {showManager ? (
@@ -73,12 +86,12 @@ function CollectionsPage({ collections, onBack, onCollectionsChange, onOpenLearn
             ) : (
                 <>
                     {collections.length === 0 ? (
-                        <Card className="border-dashed border-white/30 bg-white/5 text-center py-12">
-                            <CardContent>
-                                <p className="text-white/80">You haven&apos;t created any collections yet.</p>
-                                <p className="text-white/60 text-sm mt-2">
-                                    Generate a learning card and tap &quot;Save to Collection&quot; to build your
-                                    personalized collections.
+                        <Card className="border-dashed border-4 border-gray-300 bg-gray-50 text-center py-16 rounded-3xl">
+                            <CardContent className="space-y-4">
+                                <div className="text-7xl">📖</div>
+                                <p className="text-gray-800 font-black text-2xl">No Collections Yet!</p>
+                                <p className="text-gray-600 font-semibold text-lg max-w-md mx-auto">
+                                    Start your learning journey by creating cards and saving them to collections! ✨
                                 </p>
                             </CardContent>
                         </Card>
@@ -86,113 +99,147 @@ function CollectionsPage({ collections, onBack, onCollectionsChange, onOpenLearn
                         <div className="space-y-8">
                             <ReviewDashboard
                                 collectionIds={collections.map((collection) => collection.id)}
-                                onStartReview={() => setShowReviewSession(true)}
+                                onStartReview={() =>
+                                    onStartReview?.(
+                                        collections.map((c) => c.id),
+                                        "due"
+                                    )
+                                }
                             />
 
                             {collections.map((collection) => (
                                 <div key={collection.id} className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
+                                    {/* Collection Header */}
+                                    <div className="flex flex-wrap items-center gap-4 p-6 bg-white rounded-2xl border-4 border-black shadow-[0_6px_0_rgba(0,0,0,0.2)]">
                                         <div
-                                            className="w-4 h-4 rounded-full"
+                                            className="w-8 h-8 rounded-full border-3 border-white shadow-lg flex-shrink-0"
                                             style={{ backgroundColor: collection.color || "#3B82F6" }}
                                         />
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-semibold text-white">{collection.name}</h3>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-2xl font-black text-gray-800">{collection.name}</h3>
                                             {collection.description && (
-                                                <p className="text-sm text-white/70">{collection.description}</p>
+                                                <p className="text-gray-600 font-semibold mt-1">
+                                                    {collection.description}
+                                                </p>
                                             )}
                                         </div>
                                         <div className="flex gap-2 flex-wrap">
                                             {(collection.flags || []).map((flag) => (
-                                                <Badge key={flag} variant="secondary" className="text-xs">
+                                                <span
+                                                    key={flag}
+                                                    className="px-3 py-1 bg-purple-100 text-purple-800 font-bold text-sm rounded-full border-2 border-purple-300">
                                                     {flag}
-                                                </Badge>
+                                                </span>
                                             ))}
                                         </div>
-                                        <span className="text-sm text-white/60">
-                                            {(collection.cards || []).length} cards
-                                        </span>
+                                        <div className="bg-yellow-100 text-yellow-800 font-black px-4 py-2 rounded-full border-2 border-yellow-400 text-sm">
+                                            {(collection.cards || []).length} 📄
+                                        </div>
                                     </div>
 
                                     {!(collection.cards || []).length ? (
-                                        <Card className="border-dashed border-white/20 bg-white/5 text-center py-8">
+                                        <Card className="border-dashed border-3 border-gray-300 bg-gray-50 text-center py-10 rounded-2xl">
                                             <CardContent>
-                                                <p className="text-white/60">No cards in this collection yet.</p>
+                                                <div className="text-4xl mb-3">📝</div>
+                                                <p className="text-gray-600 font-bold text-lg">No cards yet!</p>
+                                                <p className="text-gray-500 font-medium text-sm mt-1">
+                                                    Start adding words to this collection! ✨
+                                                </p>
                                             </CardContent>
                                         </Card>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
+                                            {/* Show only first 3 cards */}
                                             {collection.cards
                                                 .slice()
                                                 .reverse()
+                                                .slice(0, 2)
                                                 .map((card) => (
                                                     <Card
                                                         key={`${card.word}-${card.savedAt}`}
-                                                        className="overflow-hidden border border-white/10 bg-white/5 shadow-md cursor-pointer transition hover:-translate-y-0.5"
+                                                        className="overflow-hidden border-3 border-black bg-white shadow-[0_6px_0_rgba(0,0,0,0.2)] rounded-2xl cursor-pointer transition-all hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] hover:-translate-y-1"
                                                         onClick={() => openCardDialog(collection, card)}
                                                         role="button"
                                                         tabIndex={0}
                                                         onKeyDown={(event) =>
                                                             event.key === "Enter" && openCardDialog(collection, card)
                                                         }>
-                                                        <div className="flex gap-4 p-4">
-                                                            <div className="relative h-28 w-28 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-inner flex-shrink-0">
+                                                        <div className="flex gap-5 p-5">
+                                                            {/* Card Image */}
+                                                            <div className="relative h-32 w-32 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg flex-shrink-0 border-3 border-black">
                                                                 <img
                                                                     src={card.imageUrl}
                                                                     alt={card.word}
                                                                     className="h-full w-full object-cover"
                                                                     onError={(event) => {
                                                                         const target = event.target as HTMLImageElement;
-                                                                        target.src = `https://via.placeholder.com/400x250/4f46e5/ffffff?text=${encodeURIComponent(
+                                                                        target.src = `https://via.placeholder.com/400x250/FFD700/8B4513?text=${encodeURIComponent(
                                                                             card.word
                                                                         )}`;
                                                                     }}
                                                                 />
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                                                                <div className="absolute left-3 bottom-3 text-sm text-white/90">
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                                                <div className="absolute left-2 bottom-2 text-lg font-black text-white capitalize drop-shadow-lg">
                                                                     {card.word}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex-1 space-y-2">
-                                                                <div className="flex items-center justify-between">
-                                                                    <Badge className="bg-emerald-100 text-emerald-700">
-                                                                        Saved
-                                                                    </Badge>
-                                                                    <span className="text-xs uppercase text-white/60">
+
+                                                            {/* Card Content */}
+                                                            <div className="flex-1 space-y-3 min-w-0">
+                                                                {/* Top Row: Badge & Collection */}
+                                                                <div className="flex items-center justify-between gap-2">
+                                                                    <span className="px-3 py-1 bg-green-100 text-green-800 font-bold text-xs rounded-full border-2 border-green-400">
+                                                                        ✓ Saved
+                                                                    </span>
+                                                                    <span className="text-xs font-bold text-gray-500 truncate">
                                                                         {collection.name}
                                                                     </span>
                                                                 </div>
-                                                                <div>
-                                                                    <p className="text-[11px] uppercase tracking-wide text-white/50">
-                                                                        Meaning
+
+                                                                {/* Meaning */}
+                                                                <div className="bg-purple-50 rounded-xl p-3 border-2 border-purple-200">
+                                                                    <p className="text-[10px] font-black uppercase tracking-wide text-purple-600 mb-1">
+                                                                        📖 Meaning
                                                                     </p>
-                                                                    <p className="text-sm text-white/90 leading-snug max-h-14 overflow-hidden">
+                                                                    <p className="text-sm text-gray-800 font-semibold leading-snug line-clamp-2">
                                                                         {card.meaning}
                                                                     </p>
                                                                 </div>
-                                                                <div>
-                                                                    <p className="text-[11px] uppercase tracking-wide text-white/50">
-                                                                        Example
+
+                                                                {/* Example */}
+                                                                <div className="bg-yellow-50 rounded-xl p-3 border-2 border-yellow-200">
+                                                                    <p className="text-[10px] font-black uppercase tracking-wide text-yellow-700 mb-1">
+                                                                        💡 Example
                                                                     </p>
-                                                                    <p className="text-sm text-white/70 italic max-h-14 overflow-hidden">
+                                                                    <p className="text-sm text-gray-700 font-medium italic line-clamp-2">
                                                                         &quot;{card.example}&quot;
                                                                     </p>
                                                                 </div>
-                                                                <div className="flex items-center justify-between text-[11px] text-white/60">
+
+                                                                {/* Footer */}
+                                                                <div className="flex items-center justify-between text-xs text-gray-500 font-medium pt-1">
                                                                     <span>
-                                                                        {new Date(card.savedAt).toLocaleDateString()} •{" "}
-                                                                        {new Date(card.savedAt).toLocaleTimeString()}
+                                                                        {new Date(card.savedAt).toLocaleDateString()}
                                                                     </span>
-                                                                    <Badge
-                                                                        variant="outline"
-                                                                        className="text-[10px] uppercase">
-                                                                        {collection.cards.length} cards
-                                                                    </Badge>
+                                                                    <span className="text-gray-400">
+                                                                        Click to view details →
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </Card>
                                                 ))}
+
+                                            {/* View All Button */}
+                                            {(collection.cards || []).length > 2 && (
+                                                <div className="text-center pt-4">
+                                                    <Button
+                                                        onClick={() => onViewCollection?.(collection.id)}
+                                                        className="bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white font-black px-6 py-3 rounded-full border-3 border-black shadow-[0_4px_0_rgba(0,0,0,0.2)] hover:shadow-[0_2px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all">
+                                                        👀 View All Cards
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -217,17 +264,6 @@ function CollectionsPage({ collections, onBack, onCollectionsChange, onOpenLearn
                     onDeleted={() => {
                         handleCollectionsChange();
                         closeCardDialog();
-                    }}
-                />
-            )}
-
-            {showReviewSession && (
-                <EnhancedReviewSession
-                    collectionIds={collections.map((collection) => collection.id)}
-                    onClose={() => setShowReviewSession(false)}
-                    onComplete={() => {
-                        setShowReviewSession(false);
-                        handleCollectionsChange();
                     }}
                 />
             )}

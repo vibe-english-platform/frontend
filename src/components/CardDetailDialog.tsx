@@ -4,11 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { Badge } from "./ui/badge";
 import { CollectionCard } from "../types";
 import { apiService } from "../lib/api";
 import { useEffect, useState } from "react";
 import { useToast } from "../lib/toast";
+import { Edit3, Trash2 } from "lucide-react";
 
 interface CardDetailDialogProps {
     open: boolean;
@@ -20,15 +20,7 @@ interface CardDetailDialogProps {
     onDeleted: () => void;
 }
 
-function CardDetailDialog({
-    open,
-    onOpenChange,
-    card,
-    collectionId,
-    collectionName,
-    onUpdated,
-    onDeleted,
-}: CardDetailDialogProps) {
+function CardDetailDialog({ open, onOpenChange, card, collectionId, onUpdated, onDeleted }: CardDetailDialogProps) {
     const [formData, setFormData] = useState({
         meaning: card.meaning,
         example: card.example,
@@ -86,86 +78,105 @@ function CardDetailDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-gray-900 border-gray-700 max-w-3xl">
-                <DialogHeader>
-                    <DialogTitle className="text-white flex items-center justify-between">
-                        <span>Saved Card • {card.word}</span>
-                        <Badge className="bg-emerald-100 text-emerald-700">Saved</Badge>
-                    </DialogTitle>
-                </DialogHeader>
-
+            <DialogHeader>
+                <DialogTitle className="text-3xl font-black text-gray-800 capitalize">{card.word}</DialogTitle>
+            </DialogHeader>
+            <DialogContent className="bg-white border-4 border-black max-w-3xl shadow-[0_12px_0_rgba(0,0,0,0.3)]">
                 <div className="space-y-6">
-                    <div className="grid gap-4 md:grid-cols-[250px_1fr]">
-                        <div className="relative h-44 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-indigo-500 to-purple-600">
-                            <img
-                                src={formData.imageUrl}
-                                alt={card.word}
-                                className="h-full w-full object-cover"
-                                onError={(event) => {
-                                    const target = event.target as HTMLImageElement;
-                                    target.src = `https://via.placeholder.com/400x250/4f46e5/ffffff?text=${encodeURIComponent(
-                                        card.word
-                                    )}`;
-                                }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                            <div className="absolute bottom-3 left-3 text-xs text-white/80">
-                                {collectionName}
-                            </div>
+                    {/* Card Image */}
+                    <div className="relative h-64 w-full overflow-hidden rounded-2xl border-4 border-black bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg">
+                        <img
+                            src={formData.imageUrl}
+                            alt={card.word}
+                            className="h-full w-full object-cover"
+                            onError={(event) => {
+                                const target = event.target as HTMLImageElement;
+                                target.src = `https://via.placeholder.com/800x600/FFD700/8B4513?text=${encodeURIComponent(
+                                    card.word
+                                )}`;
+                            }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <div className="absolute bottom-4 left-4">
+                            <p className="text-white text-2xl font-black drop-shadow-lg capitalize">{card.word}</p>
                         </div>
-                        <Card className="bg-white/5 border border-white/10">
-                            <CardContent className="space-y-3">
-                                <div>
-                                    <p className="text-[11px] uppercase tracking-wide text-white/60">Meanings</p>
-                                    <Textarea
-                                        value={formData.meaning}
-                                        onChange={(event) => setFormData((prev) => ({ ...prev, meaning: event.target.value }))}
-                                        rows={3}
-                                        className="bg-gray-800 border-gray-600 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] uppercase tracking-wide text-white/60">Example</p>
-                                    <Textarea
-                                        value={formData.example}
-                                        onChange={(event) => setFormData((prev) => ({ ...prev, example: event.target.value }))}
-                                        rows={3}
-                                        className="bg-gray-800 border-gray-600 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-white text-[11px] uppercase tracking-wide">Image URL</Label>
-                                    <Input
-                                        value={formData.imageUrl}
-                                        onChange={(event) => setFormData((prev) => ({ ...prev, imageUrl: event.target.value }))}
-                                        className="bg-gray-800 border-gray-600 text-white"
-                                    />
-                                    <p className="text-[11px] text-white/60 mt-1">
-                                        Future storage integration (Cloudinary, S3, etc.) can hook here.
-                                    </p>
-                                </div>
-                                <div className="text-[13px] text-white/60">
-                                    Saved on {new Date(card.savedAt).toLocaleString()}
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    {/* Edit Form */}
+                    <Card className="bg-gray-50 border-3 border-gray-300 rounded-2xl shadow-lg">
+                        <CardContent className="space-y-4 p-6">
+                            {/* Meaning */}
+                            <div>
+                                <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                    📖 Meaning
+                                </Label>
+                                <Textarea
+                                    value={formData.meaning}
+                                    onChange={(event) =>
+                                        setFormData((prev) => ({ ...prev, meaning: event.target.value }))
+                                    }
+                                    rows={3}
+                                    className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                />
+                            </div>
+
+                            {/* Example */}
+                            <div>
+                                <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                    💡 Example
+                                </Label>
+                                <Textarea
+                                    value={formData.example}
+                                    onChange={(event) =>
+                                        setFormData((prev) => ({ ...prev, example: event.target.value }))
+                                    }
+                                    rows={3}
+                                    className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                />
+                            </div>
+
+                            {/* Image URL */}
+                            <div>
+                                <Label className="text-gray-800 font-black text-base mb-2 flex items-center gap-2">
+                                    🖼️ Image URL
+                                </Label>
+                                <Input
+                                    value={formData.imageUrl}
+                                    onChange={(event) =>
+                                        setFormData((prev) => ({ ...prev, imageUrl: event.target.value }))
+                                    }
+                                    className="border-3 border-gray-800 rounded-xl font-semibold focus:ring-4 focus:ring-purple-400"
+                                />
+                                <p className="text-xs text-gray-500 font-medium mt-2">
+                                    💡 Tip: You can update the image URL for this card
+                                </p>
+                            </div>
+
+                            {/* Saved Date */}
+                            <div className="pt-3 border-t-2 border-gray-200">
+                                <p className="text-sm text-gray-500 font-semibold">
+                                    📅 Saved on {new Date(card.savedAt).toLocaleDateString()} at{" "}
+                                    {new Date(card.savedAt).toLocaleTimeString()}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-3">
                         <Button
                             onClick={handleUpdate}
                             disabled={isSaving}
-                            className="bg-indigo-600 hover:bg-indigo-700 flex-1"
-                        >
-                            {isSaving ? "Saving…" : "Update Card"}
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-black py-3 rounded-full shadow-[0_4px_0_rgba(0,0,0,0.2)] border-3 border-black hover:shadow-[0_2px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all disabled:opacity-50">
+                            <Edit3 className="w-5 h-5 mr-2" />
+                            {isSaving ? "Saving..." : "Update Card"}
                         </Button>
                         <Button
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            variant="outline"
-                            className="text-red-400 hover:text-red-300 border-red-400"
-                        >
-                            {isDeleting ? "Deleting…" : "Delete Card"}
+                            className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-black py-3 rounded-full shadow-[0_4px_0_rgba(0,0,0,0.2)] border-3 border-black hover:shadow-[0_2px_0_rgba(0,0,0,0.2)] hover:translate-y-0.5 transition-all disabled:opacity-50">
+                            <Trash2 className="w-5 h-5 mr-2" />
+                            {isDeleting ? "Deleting..." : "Delete Card"}
                         </Button>
                     </div>
                 </div>
@@ -175,4 +186,3 @@ function CardDetailDialog({
 }
 
 export default CardDetailDialog;
-

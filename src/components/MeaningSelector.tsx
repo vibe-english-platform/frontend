@@ -2,8 +2,6 @@ import { useState } from "react";
 import { ArrowLeft, Edit3, Sparkles, Loader2 } from "lucide-react";
 import { WordMeaning } from "../types";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
-import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
 
 interface MeaningSelectorProps {
@@ -35,44 +33,42 @@ function MeaningSelector({ word, meanings, onMeaningSelect, loading, onBack }: M
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button
-                    variant="ghost"
-                    size="sm"
                     onClick={onBack}
                     disabled={loading}
-                    className="text-white/80 hover:text-white hover:bg-white/10">
+                    className="bg-white text-purple-600 hover:bg-gray-100 font-bold px-6 py-3 rounded-full shadow-lg border-3 border-black">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
             </div>
 
-            <Card className="relative overflow-hidden shadow-xl">
-                {/* Word Header */}
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
-                    <h2 className="text-2xl font-bold text-white">
-                        Select a meaning for <span className="capitalize">&quot;{word}&quot;</span>
+            <div className="relative overflow-hidden bg-white rounded-3xl shadow-[0_8px_0_rgba(0,0,0,0.2)] border-4 border-black">
+                {/* Word Header - Cartoon Style */}
+                <div className="bg-gradient-to-r from-purple-400 to-pink-400 p-6 border-b-4 border-black">
+                    <h2 className="text-3xl font-black text-white" style={{ textShadow: "3px 3px 0 rgba(0,0,0,0.2)" }}>
+                        Choose Meaning for <span className="capitalize">&quot;{word}&quot;</span>! 🎯
                     </h2>
-                    <p className="text-white/70 mt-1">Choose the definition that fits your learning context</p>
+                    <p className="text-white/90 mt-1 font-bold">Pick the one that fits best!</p>
                 </div>
 
-                <CardContent className="p-6 space-y-4">
-                    {/* Meanings List */}
+                <div className="p-6 space-y-4">
+                    {/* Meanings List - Cartoon Style */}
                     <div className="max-h-[350px] space-y-3 overflow-y-auto pr-2">
                         {meanings.slice(0, 6).map((meaning, index) => (
                             <button
                                 key={index}
                                 onClick={() => handleMeaningClick(meaning.definition)}
                                 disabled={loading}
-                                className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                                className={`w-full text-left p-4 rounded-2xl border-3 transition-all ${
                                     loading
                                         ? "opacity-50 cursor-not-allowed"
-                                        : "hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md cursor-pointer"
-                                } border-gray-100`}>
-                                <Badge className="mb-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                                        : "hover:border-purple-400 hover:bg-purple-50 hover:scale-105 cursor-pointer border-gray-300"
+                                }`}>
+                                <span className="inline-block mb-2 px-3 py-1 bg-purple-200 text-purple-800 font-bold text-xs rounded-full border-2 border-purple-400">
                                     {meaning.partOfSpeech}
-                                </Badge>
-                                <p className="text-gray-700 leading-relaxed">{meaning.definition}</p>
+                                </span>
+                                <p className="text-gray-700 leading-relaxed font-semibold">{meaning.definition}</p>
                                 {meaning.example && (
-                                    <p className="text-gray-500 text-sm mt-2 italic border-l-2 border-indigo-200 pl-3">
+                                    <p className="text-gray-600 text-sm mt-2 italic border-l-4 border-purple-300 pl-3">
                                         &quot;{meaning.example}&quot;
                                     </p>
                                 )}
@@ -80,16 +76,15 @@ function MeaningSelector({ word, meanings, onMeaningSelect, loading, onBack }: M
                         ))}
                     </div>
 
-                    {/* Custom Meaning */}
-                    <div className="pt-4 border-t">
+                    {/* Custom Meaning - Cartoon Style */}
+                    <div className="pt-4 border-t-3 border-gray-200">
                         {!showCustomInput ? (
                             <Button
-                                variant="outline"
-                                className="w-full h-12"
+                                className="w-full h-12 bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold rounded-full border-3 border-gray-800"
                                 onClick={() => setShowCustomInput(true)}
                                 disabled={loading}>
                                 <Edit3 className="mr-2 h-4 w-4" />
-                                Or type your own meaning
+                                Or type your own meaning! ✏️
                             </Button>
                         ) : (
                             <div className="space-y-3">
@@ -99,49 +94,49 @@ function MeaningSelector({ word, meanings, onMeaningSelect, loading, onBack }: M
                                     placeholder="Enter your own meaning or context..."
                                     disabled={loading}
                                     rows={3}
-                                    className="resize-none"
+                                    className="resize-none border-3 border-gray-800 rounded-xl font-semibold"
                                 />
                                 <div className="flex gap-3">
                                     <Button
                                         onClick={handleCustomSubmit}
                                         disabled={loading || !customMeaning.trim()}
-                                        className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                                        className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-black rounded-full shadow-[0_6px_0_rgba(0,0,0,0.2)] border-3 border-black hover:shadow-[0_3px_0_rgba(0,0,0,0.2)] hover:translate-y-1 transition-all">
                                         {loading ? (
                                             <>
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Generating...
+                                                Creating...
                                             </>
                                         ) : (
                                             <>
                                                 <Sparkles className="mr-2 h-4 w-4" />
-                                                Create Learning Card
+                                                Create Card! 🎨
                                             </>
                                         )}
                                     </Button>
                                     <Button
-                                        variant="outline"
                                         onClick={() => {
                                             setShowCustomInput(false);
                                             setCustomMeaning("");
                                         }}
-                                        disabled={loading}>
+                                        disabled={loading}
+                                        className="bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold rounded-full border-3 border-gray-800">
                                         Cancel
                                     </Button>
                                 </div>
                             </div>
                         )}
                     </div>
-                </CardContent>
+                </div>
 
-                {/* Loading Overlay */}
+                {/* Loading Overlay - Cartoon Style */}
                 {loading && (
-                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center">
-                        <Loader2 className="h-12 w-12 text-indigo-600 animate-spin mb-4" />
-                        <p className="text-lg font-medium text-gray-700">Creating your learning card...</p>
-                        <p className="text-sm text-gray-500">This may take a few seconds</p>
+                    <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center">
+                        <Loader2 className="h-16 w-16 text-purple-600 animate-spin mb-4" />
+                        <p className="text-2xl font-black text-gray-800">Creating your card...</p>
+                        <p className="text-sm text-gray-600 font-bold mt-2">This is gonna be awesome! 🎉</p>
                     </div>
                 )}
-            </Card>
+            </div>
         </div>
     );
 }
